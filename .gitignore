@@ -210,4 +210,5 @@ Thumbs.db
 # 日志文件
 *.log
 
-
+# 数据集
+MultiVector-Backup/multivector_baselines/data/

@@ -380,7 +380,7 @@ def main() -> None:
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()
 
-    runtime_root = args.runtime_root or Path(f"/data/{args.username}/Dataset/multi-vector-retrieval")
+    runtime_root = args.runtime_root or Path(f"/data1/{args.username}/Dataset/multi-vector-retrieval")
     flat_root = args.flat_root or (runtime_root / "FlatData")
     flat_dataset_root = flat_root / args.dataset
     transformed_dir = flat_dataset_root / "doc_embeddings" / "transformed_embeddings"

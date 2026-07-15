@@ -33,13 +33,12 @@ pip install -r requirements.txt
 
     ```bash
     python script/flat_multivector/prepare_flat_multivector_dataset.py \
-        --username Ah \
+        --username chenyifeng \
         --dataset scidocs-large-multi-flat-test \
         --doc-embeddings ./data/scidocs-large-multi/full_multi_embeddings_scidocs-large.npy \
         --doc-lens ./data/scidocs-large-multi/full_multi_chunk_num_scidocs-large.npy \
         --query-embeddings ./data/scidocs-large-multi/full_multi_embeddings_scidocs-large_query.npy \
         --query-lens ./data/scidocs-large-multi/full_multi_chunk_num_scidocs-large_query.npy \
-        --runtime-root ./Dataset/multi-vector-retrieval \
         --max-queries 1000 \
         --force
     ```
@@ -57,6 +56,15 @@ There are two ways to do this.
         --username <username> \
         --dataset <dataset name> \
         --manifest <manifest.json path>
+    ```
+
+    Example for ```scidocs-large-multi``` :
+
+    ```
+    python script/flat_multivector/build_plaid_from_flat_dataset.py \
+        --username chenyifeng \
+        --dataset scidocs-large-multi-flat-test \
+        --manifest /data1/chenyifeng/Dataset/multi-vector-retrieval/FlatData/scidocs-large-multi-flat-test/manifest.json
     ```
 
     Run Plaid retrieval:

@@ -58,15 +58,6 @@ There are two ways to do this.
         --manifest <manifest.json path>
     ```
 
-    Example for ```scidocs-large-multi``` :
-
-    ```
-    python script/flat_multivector/build_plaid_from_flat_dataset.py \
-        --username chenyifeng \
-        --dataset scidocs-large-multi-flat-test \
-        --manifest /data1/chenyifeng/Dataset/multi-vector-retrieval/FlatData/scidocs-large-multi-flat-test/manifest.json
-    ```
-
     Run Plaid retrieval:
 
     ```bash
@@ -81,22 +72,200 @@ There are two ways to do this.
     python script/flat_multivector/eval_flat_groundtruth.py \
         --username <username> \
         --dataset <dataset name> \
-        --method <method name>
+        --method plaid
+    ```
+
+    Example for ```scidocs-large-multi``` :
+
+    ```
+    python script/flat_multivector/build_plaid_from_flat_dataset.py \
+        --username chenyifeng \
+        --dataset scidocs-large-multi-flat-test \
+        --manifest /data1/chenyifeng/Dataset/multi-vector-retrieval/FlatData/scidocs-large-multi-flat-test/manifest.json
+    ```
+
+    ```bash
+    python script/evaluation/eval_plaid.py \
+        --username chenyifeng \
+        --dataset scidocs-large-multi-flat-test
+    ```
+
+    ```bash
+    python script/flat_multivector/eval_flat_groundtruth.py \
+        --username chenyifeng \
+        --dataset scidocs-large-multi-flat-test \
+        --method plaid
     ```
 
 - Option B: one wrapper
 
     ```bash
-    bash script/flat_multivector/run_plaid_flat.sh ali clerc-med-multi-flat
+    bash script/flat_multivector/run_plaid_flat.sh <username> <dataset name>
     ```
 
+    Example for ```scidocs-large-multi``` :
 
-
+    ```
+    bash script/flat_multivector/run_plaid_flat.sh chenyifeng scidocs-large-multi-flat-test
+    ```
 
 3. Run Dessert
+
+Important:
+
+- Dessert depends on Plaid artifacts
+- run Plaid build first
+- Dessert uses the Plaid centroids and codes
+
+Command:
+
+```bash
+python script/evaluation/eval_dessert.py \
+  --username <username> \
+  --dataset <dataset name>
+```
+
+Evaluate Dessert:
+
+```bash
+python script/flat_multivector/eval_flat_groundtruth.py \
+  --username <username> \
+  --dataset <dataset name> \
+  --method dessert
+```
+
+Or use the wrapper:
+
+```bash
+bash script/flat_multivector/run_dessert_flat.sh <username> clerc-med-multi-flat
+```
+
+
+Example for ```scidocs-large-multi``` :
+
+```bash
+python script/evaluation/eval_dessert.py \
+  --username chenyifeng \
+  --dataset scidocs-large-multi-flat-test
+```
+
+```bash
+python script/flat_multivector/eval_flat_groundtruth.py \
+  --username chenyifeng \
+  --dataset scidocs-large-multi-flat-test \
+  --method dessert
+```
+
+Or
+
+```bash
+bash script/flat_multivector/run_dessert_flat.sh chenyifeng scidocs-large-multi-flat-test
+```
 
 
 4. Run MUVERA
 
+Command:
+
+```bash
+python script/evaluation/eval_muvera.py \
+  --username <username> \
+  --dataset_name <dataset name>
+```
+
+Important:
+
+- MUVERA reads `Embedding/<dataset>/base_embedding/*.npy`
+- those files are created by the Plaid build path
+- so if you only ran the preparation script, run Plaid build first
+
+Evaluate MUVERA:
+
+```bash
+python script/flat_multivector/eval_flat_groundtruth.py \
+  --username <username> \
+  --dataset <dataset name> \
+  --method MUVERA
+```
+
+Or use the wrapper:
+
+```bash
+bash script/flat_multivector/run_muvera_flat.sh <username> <dataset name>
+```
+
+Example for ```scidocs-large-multi``` :
+
+```bash
+python script/evaluation/eval_muvera.py \
+  --username chenyifeng \
+  --dataset_name scidocs-large-multi-flat-test
+```
+
+```bash
+python script/flat_multivector/eval_flat_groundtruth.py \
+  --username chenyifeng \
+  --dataset scidocs-large-multi-flat-test \
+  --method MUVERA
+```
+
+Or
+
+```bash
+bash script/flat_multivector/run_muvera_flat.sh chenyifeng scidocs-large-multi-flat-test
+```
+
+
 
 5. Run IGP
+
+Command:
+
+```bash
+python script/evaluation/eval_igp.py \
+  --username ali \
+  --dataset_name clerc-med-multi-flat
+```
+
+Important:
+
+- IGP also reads `Embedding/<dataset>/base_embedding/*.npy`
+- those files are created by the Plaid build path
+- so if you only ran the preparation script, run Plaid build first
+
+Evaluate IGP:
+
+```bash
+python script/flat_multivector/eval_flat_groundtruth.py \
+  --username ali \
+  --dataset clerc-med-multi-flat \
+  --method IGP
+```
+
+Or use the wrapper:
+
+```bash
+bash script/flat_multivector/run_igp_flat.sh ali clerc-med-multi-flat
+```
+
+
+Example for ```scidocs-large-multi``` :
+
+```bash
+python script/evaluation/eval_igp.py \
+  --username ali \
+  --dataset_name scidocs-large-multi-flat-test
+```
+
+```bash
+python script/flat_multivector/eval_flat_groundtruth.py \
+  --username ali \
+  --dataset scidocs-large-multi-flat-test \
+  --method IGP
+```
+
+Or
+
+```bash
+bash script/flat_multivector/run_igp_flat.sh ali scidocs-large-multi-flat-test
+```

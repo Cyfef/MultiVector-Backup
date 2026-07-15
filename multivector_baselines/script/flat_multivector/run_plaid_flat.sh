@@ -9,7 +9,7 @@ fi
 
 USERNAME="$1"
 DATASET="$2"
-MANIFEST="${3:-/data/${USERNAME}/Dataset/multi-vector-retrieval/FlatData/${DATASET}/manifest.json}"
+MANIFEST="${3:-/data1/${USERNAME}/Dataset/multi-vector-retrieval/FlatData/${DATASET}/manifest.json}"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 
 cd /home/ali/plaid-index

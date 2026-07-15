@@ -199,7 +199,7 @@ def main() -> None:
     parser.add_argument("--k-values", type=int, nargs="+", default=[10, 100])
     args = parser.parse_args()
 
-    runtime_root = Path(f"/data/{args.username}/Dataset/multi-vector-retrieval")
+    runtime_root = Path(f"/data1/{args.username}/Dataset/multi-vector-retrieval")
     manifest_path = args.manifest or (runtime_root / "FlatData" / args.dataset / "manifest.json")
     with manifest_path.open("r", encoding="utf-8") as f:
         manifest = json.load(f)

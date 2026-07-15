@@ -5,12 +5,35 @@
 
 ##### environment
 
-```
+```bash
 conda create -n flatmulti python=3.10.18 pip setuptools wheel -y
 conda activate flatmulti
 
 pip install -r requirements.txt
 ```
+
+```bash
+mkdir -p /data1/chenyifeng/libs
+cd /data1/chenyifeng/libs
+
+git clone https://github.com/cmuparlay/parlaylib.git
+cd parlaylib
+
+mkdir build && cd build
+
+cmake -DCMAKE_INSTALL_PREFIX=/data1/chenyifeng/libs/parlay_install ..
+make -j
+make install
+```
+
+```bash
+rm -rf /data1/chenyifeng/multi-vector-retrieval/build/*
+rm /data1/chenyifeng/MultiVector-Backup/multivector_baselines/script/evaluation/IGP*.so
+
+export CMAKE_PREFIX_PATH=/data1/chenyifeng/libs/parlay_install:$CMAKE_PREFIX_PATH
+export Parlay_DIR=/data1/chenyifeng/libs/parlay_install/share/parlay/cmake
+```
+
 
 
 ##### run
@@ -137,7 +160,7 @@ python script/flat_multivector/eval_flat_groundtruth.py \
 Or use the wrapper:
 
 ```bash
-bash script/flat_multivector/run_dessert_flat.sh <username> clerc-med-multi-flat
+bash script/flat_multivector/run_dessert_flat.sh <username> <dataset name>
 ```
 
 
@@ -164,6 +187,42 @@ bash script/flat_multivector/run_dessert_flat.sh chenyifeng scidocs-large-multi-
 
 
 4. Run MUVERA
+
+Build environment:
+
+```bash
+mkdir -p local
+
+# fmt
+git clone https://github.com/fmtlib/fmt.git
+cd fmt
+git checkout 9.1.0
+mkdir build && cd build
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/data1/chenyifeng/MultiVector-Backup/multivector_baselines/local \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DFMT_TEST=OFF \
+    -DBUILD_SHARED_LIBS=ON   
+make -j $(nproc)
+make install
+cd ../..
+
+# spdlog
+git clone https://github.com/gabime/spdlog.git
+cd spdlog
+git checkout v1.11.0
+mkdir build && cd build
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=/data1/chenyifeng/MultiVector-Backup/multivector_baselines/local \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DSPDLOG_FMT_EXTERNAL=ON \
+    -DSPDLOG_BUILD_SHARED=ON \
+    -Dfmt_DIR=/data1/chenyifeng/MultiVector-Backup/multivector_baselines/local/lib/cmake/fmt
+make -j $(nproc)
+make install
+
+export LD_LIBRARY_PATH=/data1/chenyifeng/MultiVector-Backup/multivector_baselines/local/lib:$LD_LIBRARY_PATH
+```
 
 Command:
 
@@ -223,8 +282,8 @@ Command:
 
 ```bash
 python script/evaluation/eval_igp.py \
-  --username ali \
-  --dataset_name clerc-med-multi-flat
+  --username <username> \
+  --dataset_name <dataset name>
 ```
 
 Important:
@@ -237,15 +296,15 @@ Evaluate IGP:
 
 ```bash
 python script/flat_multivector/eval_flat_groundtruth.py \
-  --username ali \
-  --dataset clerc-med-multi-flat \
+  --username <username> \
+  --dataset <dataset name> \
   --method IGP
 ```
 
 Or use the wrapper:
 
 ```bash
-bash script/flat_multivector/run_igp_flat.sh ali clerc-med-multi-flat
+bash script/flat_multivector/run_igp_flat.sh <username> <dataset name>
 ```
 
 
@@ -253,13 +312,13 @@ Example for ```scidocs-large-multi``` :
 
 ```bash
 python script/evaluation/eval_igp.py \
-  --username ali \
+  --username chenyifeng \
   --dataset_name scidocs-large-multi-flat-test
 ```
 
 ```bash
 python script/flat_multivector/eval_flat_groundtruth.py \
-  --username ali \
+  --username chenyifeng \
   --dataset scidocs-large-multi-flat-test \
   --method IGP
 ```
@@ -267,5 +326,5 @@ python script/flat_multivector/eval_flat_groundtruth.py \
 Or
 
 ```bash
-bash script/flat_multivector/run_igp_flat.sh ali scidocs-large-multi-flat-test
+bash script/flat_multivector/run_igp_flat.sh chenyifeng scidocs-large-multi-flat-test
 ```

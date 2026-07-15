@@ -86,7 +86,7 @@ def approximate_solution_build_index(
     build_index_config: dict,
     build_index_suffix: str,
 ):
-    embedding_dir = Path(f"/data/{username}/Dataset/multi-vector-retrieval/Embedding/{dataset}")
+    embedding_dir = Path(f"/data1/{username}/Dataset/multi-vector-retrieval/Embedding/{dataset}")
     item_n_vec_l = np.load(embedding_dir / "doclens.npy").astype(np.uint32)
     n_item = int(item_n_vec_l.shape[0])
     vec_dim = int(np.load(embedding_dir / "base_embedding" / "encoding0_float32.npy").shape[1])
@@ -120,7 +120,7 @@ def approximate_solution_build_index(
     build_index_time_sec = time.time() - start_time
     print(f"insert time spend {build_index_time_sec:.3f}s")
 
-    result_performance_path = Path(f"/data/{username}/Dataset/multi-vector-retrieval/Result/performance")
+    result_performance_path = Path(f"/data1/{username}/Dataset/multi-vector-retrieval/Result/performance")
     ensure_dir(result_performance_path)
     build_index_performance_filename = result_performance_path / f"{dataset}-build_index-{module_name}-{build_index_suffix}.json"
     with build_index_performance_filename.open("w", encoding="utf-8") as f:
@@ -147,11 +147,11 @@ def run_retrieval_experiments(
     topk: int,
     retrieval_parameter_l: list,
 ):
-    embedding_dir = Path(f"/data/{username}/Dataset/multi-vector-retrieval/Embedding/{dataset}")
+    embedding_dir = Path(f"/data1/{username}/Dataset/multi-vector-retrieval/Embedding/{dataset}")
     query_l = np.load(embedding_dir / "query_embedding.npy")
 
-    result_answer_path = Path(f"/data/{username}/Dataset/multi-vector-retrieval/Result/answer")
-    result_performance_path = Path(f"/data/{username}/Dataset/multi-vector-retrieval/Result/performance")
+    result_answer_path = Path(f"/data1/{username}/Dataset/multi-vector-retrieval/Result/answer")
+    result_performance_path = Path(f"/data1/{username}/Dataset/multi-vector-retrieval/Result/performance")
     ensure_dir(result_answer_path)
     ensure_dir(result_performance_path)
 

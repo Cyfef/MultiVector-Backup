@@ -40,7 +40,7 @@ set(OpenBLAS_LIBRARIES "/usr/lib/x86_64-linux-gnu/libopenblas.so")
 conda create -n GEM python=3.11 -y
 conda activate GEM
 
-pip install numpy==2.4.4 tqdm==4.67.3 # faiss-cpu==1.14.1
+pip install numpy==2.4.4 tqdm==4.67.3 # faiss-cpu==1.14.3
 
 # if nvidia-cuda-toolkit is ok
 pip install faiss-gpu
@@ -61,20 +61,19 @@ This section rebuilds everything from the raw SciDocs `.npy` files.
 ### 5.1 Define Paths
 
 ```bash
-export REPO_ROOT=/data/ali/gem
-export PYTHON_BIN=/data/ali/gem-baseline/bin/python
-
+export REPO_ROOT=/data1/chenyifeng/MultiVector-Backup/gem
+export PYTHON_BIN=/data1/chenyifeng/miniconda3/envs/GEM/bin/python3
 export DATASET_NAME=scidocs
 export DATASET_STEM=scidocs
-export RAW_SOURCE_DIR=/data1/liuyaoyang/Papers/ACFDE/output/scidocs/colbert
-export RAW_TARGET_DIR=/data/ali/scidocs-colbert
-export OUTPUT_ROOT=/data/ali/scidocs-gem-data
-export INDEX_ROOT=/data/ali/scidocs-gem-index
-export RESULTS_DIR=/data/ali/gem/results/scidocs_full_run_$(date +%Y%m%d_%H%M%S)
+export RAW_SOURCE_DIR=/data1/chenyifeng/scidocs/colbert
+export RAW_TARGET_DIR=/data1/chenyifeng/scidocs-colbert
+export OUTPUT_ROOT=/data1/chenyifeng/scidocs-gem-data
+export INDEX_ROOT=/data1/chenyifeng/scidocs-gem-index
+export RESULTS_DIR=/data1/chenyifeng/MultiVector-Backup/gem/results/scidocs_full_run_$(date +%Y%m%d_%H%M%S)
 
-export QUERIES_FILE=/data1/liuyaoyang/Papers/ACFDE/datasets/scidocs/queries.jsonl
-export CORPUS_FILE=/data1/liuyaoyang/Papers/ACFDE/datasets/scidocs/corpus.jsonl
-export QRELS_FILE=/data1/liuyaoyang/Papers/ACFDE/datasets/scidocs/qrels/test.tsv
+export QUERIES_FILE=/data1/chenyifeng/scidocs/beir/queries.jsonl
+export CORPUS_FILE=/data1/chenyifeng/scidocs/beir/corpus.jsonl
+export QRELS_FILE=/data1/chenyifeng/scidocs/beir/qrels/test.tsv
 export QRELS_QUERY_ORDER=queries-jsonl
 ```
 

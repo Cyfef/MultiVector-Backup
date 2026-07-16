@@ -1,0 +1,15 @@
+{
+  "run": "/data1/chenyifeng/MultiVector-Backup/gem/results/scidocs_full_run_20260716_105838/scidocs_results_512_all_24_80_100_t4_rerank512_ef16000.tsv",
+  "nprob": 4,
+  "rerankK": 512,
+  "ef": 16000,
+  "num_queries": 1000,
+  "dataset_num_queries": 1000,
+  "query_limit": 0,
+  "avg_query_time_seconds": 0.0562096,
+  "qps": 17.7906,
+  "peak_ram_mib": 2397.5,
+  "search_ram_start_mib": 1578.26,
+  "search_peak_ram_mib": 1578.26,
+  "search_ram_delta_mib": 0
+}

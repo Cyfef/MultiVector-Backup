@@ -1,0 +1,2 @@
+dataset_dir,split,run,query_count,corpus_count,results_query_count,search_threads,avg_query_time_ns,avg_query_time_s,qps,NDCG@100,MAP@100,MRR@100,Recall@100,P@100
+/data1/liuyaoyang/Papers/ACFDE/datasets/scidocs,test,/home/ali/EMVB/results/scidocs/emvb_ivfpq_l2_nlist4096_m32/results_k100_r050.tsv,1000,25657,1000,1,64908700.0,0.0649087,15.406255247755693,0.20634,0.09758,0.27627,0.32827,0.01616

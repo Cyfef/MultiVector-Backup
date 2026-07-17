@@ -1,0 +1,27 @@
+{
+  "corpus_count": 25657,
+  "dataset_dir": "/data1/liuyaoyang/Papers/ACFDE/datasets/scidocs",
+  "k_values": [
+    10
+  ],
+  "map": {
+    "MAP@10": 0.0838
+  },
+  "mrr": {
+    "MRR@10": 0.26547
+  },
+  "ndcg": {
+    "NDCG@10": 0.14614
+  },
+  "precision": {
+    "P@10": 0.0745
+  },
+  "query_count": 1000,
+  "recall": {
+    "Recall@10": 0.15078
+  },
+  "results_query_count": 1000,
+  "run": "/home/ali/EMVB/results/scidocs/emvb_ivfpq_l2_nlist4096_m32/results_k10.tsv",
+  "search_threads": 1,
+  "split": "test"
+}

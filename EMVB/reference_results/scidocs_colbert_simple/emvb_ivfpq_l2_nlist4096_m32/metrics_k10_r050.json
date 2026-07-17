@@ -1,0 +1,30 @@
+{
+  "avg_query_time_ns": 38242885.0,
+  "avg_query_time_s": 0.038242885,
+  "corpus_count": 25657,
+  "dataset_dir": "/data1/liuyaoyang/Papers/ACFDE/datasets/scidocs",
+  "k_values": [
+    10
+  ],
+  "map": {
+    "MAP@10": 0.08207
+  },
+  "mrr": {
+    "MRR@10": 0.26324
+  },
+  "ndcg": {
+    "NDCG@10": 0.14352
+  },
+  "precision": {
+    "P@10": 0.0726
+  },
+  "qps": 26.148654841286167,
+  "query_count": 1000,
+  "recall": {
+    "Recall@10": 0.14708
+  },
+  "results_query_count": 1000,
+  "run": "/home/ali/EMVB/results/scidocs/emvb_ivfpq_l2_nlist4096_m32/results_k10_r050.tsv",
+  "search_threads": 1,
+  "split": "test"
+}

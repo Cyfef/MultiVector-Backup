@@ -1,0 +1,2 @@
+dataset,k,search_threads,avg_query_time_ns,qps
+scidocs,10,1,63621853,15.717870

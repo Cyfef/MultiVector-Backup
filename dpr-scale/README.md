@@ -26,6 +26,12 @@ wget https://dl.fbaipublicfiles.com/citadel/checkpoints/citadel/citadel/checkpoi
 wget https://dl.fbaipublicfiles.com/citadel/checkpoints/citadel/citadel_plus/checkpoint_best.ckpt
 ```
 
+```
+cd dpr-scale/retriever_ext
+pip install Cython
+python setup.py build_ext --inplace
+```
+
 
 ## II. Evaluation
 

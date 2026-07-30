@@ -1,0 +1,260 @@
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: /data1/chenyifeng/MultiVector-Backup/dpr-scale/hydra_outputs/scidocs
+    subdir: ${hydra.job.num}
+  launcher:
+    submitit_folder: ${hydra.sweep.dir}/.submitit/%j
+    timeout_min: 1440
+    cpus_per_task: 10
+    gpus_per_node: ${trainer.gpus}
+    tasks_per_node: ${trainer.gpus}
+    mem_gb: null
+    nodes: ${trainer.num_nodes}
+    name: ${hydra.job.name}
+    stderr_to_stdout: false
+    _target_: hydra_plugins.hydra_submitit_launcher.submitit_launcher.SlurmLauncher
+    partition: a100
+    qos: null
+    comment: null
+    constraint: null
+    exclude: null
+    gres: null
+    cpus_per_gpu: null
+    gpus_per_task: null
+    mem_per_gpu: null
+    mem_per_cpu: null
+    account: null
+    signal_delay_s: 120
+    max_num_timeout: 0
+    additional_parameters: {}
+    array_parallelism: 256
+    setup: null
+  sweeper:
+    _target_: hydra._internal.core_plugins.basic_sweeper.BasicSweeper
+    max_batch_size: null
+  help:
+    app_name: ${hydra.job.name}
+    header: '${hydra.help.app_name} is powered by Hydra.
+
+      '
+    footer: 'Powered by Hydra (https://hydra.cc)
+
+      Use --hydra-help to view Hydra specific help
+
+      '
+    template: '${hydra.help.header}
+
+      == Configuration groups ==
+
+      Compose your configuration from those groups (group=option)
+
+
+      $APP_CONFIG_GROUPS
+
+
+      == Config ==
+
+      Override anything in the config (foo.bar=value)
+
+
+      $CONFIG
+
+
+      ${hydra.help.footer}
+
+      '
+  hydra_help:
+    template: 'Hydra (${hydra.runtime.version})
+
+      See https://hydra.cc for more info.
+
+
+      == Flags ==
+
+      $FLAGS_HELP
+
+
+      == Configuration groups ==
+
+      Compose your configuration from those groups (For example, append hydra/job_logging=disabled
+      to command line)
+
+
+      $HYDRA_CONFIG_GROUPS
+
+
+      Use ''--cfg hydra'' to Show the Hydra config.
+
+      '
+    hydra_help: ???
+  hydra_logging:
+    version: 1
+    formatters:
+      simple:
+        format: '[%(asctime)s][HYDRA] %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: simple
+        stream: ext://sys.stdout
+    root:
+      level: INFO
+      handlers:
+      - console
+    loggers:
+      logging_example:
+        level: DEBUG
+    disable_existing_loggers: false
+  job_logging:
+    version: 1
+    formatters:
+      simple:
+        format: '[%(asctime)s][%(name)s][%(levelname)s] - %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        formatter: simple
+        stream: ext://sys.stdout
+      file:
+        class: logging.FileHandler
+        formatter: simple
+        filename: ${hydra.job.name}.log
+    root:
+      level: INFO
+      handlers:
+      - console
+      - file
+    disable_existing_loggers: false
+  env: {}
+  searchpath: []
+  callbacks: {}
+  output_subdir: .hydra
+  overrides:
+    hydra:
+    - hydra.sweep.dir=/data1/chenyifeng/MultiVector-Backup/dpr-scale/hydra_outputs/scidocs
+    task:
+    - datamodule=generate
+    - datamodule.test_path=/data1/chenyifeng/MultiVector-Backup/dpr-scale/datasets/scidocs/dpr-scale/corpus.tsv
+    - task=multivec
+    - task/model=citadel_model
+    - task.model.tok_projection_dim=32
+    - task.model.cls_projection_dim=128
+    - task.shared_model=True
+    - +task.add_cls=True
+    - +task.query_topk=1
+    - +task.context_topk=5
+    - +task.weight_threshold=0.0
+    - +task.ctx_embeddings_dir=/data1/chenyifeng/MultiVector-Backup/dpr-scale/embeddings
+    - +task.checkpoint_path=/data1/chenyifeng/MultiVector-Backup/dpr-scale/ckpt/checkpoint_best.ckpt
+    - +task.add_context_id=False
+  job:
+    name: generate_multivec_embeddings
+    override_dirname: +task.add_cls=True,+task.add_context_id=False,+task.checkpoint_path=/data1/chenyifeng/MultiVector-Backup/dpr-scale/ckpt/checkpoint_best.ckpt,+task.context_topk=5,+task.ctx_embeddings_dir=/data1/chenyifeng/MultiVector-Backup/dpr-scale/embeddings,+task.query_topk=1,+task.weight_threshold=0.0,datamodule.test_path=/data1/chenyifeng/MultiVector-Backup/dpr-scale/datasets/scidocs/dpr-scale/corpus.tsv,datamodule=generate,task.model.cls_projection_dim=128,task.model.tok_projection_dim=32,task.shared_model=True,task/model=citadel_model,task=multivec
+    id: ???
+    num: ???
+    config_name: msmarco_aws.yaml
+    env_set: {}
+    env_copy: []
+    config:
+      override_dirname:
+        kv_sep: '='
+        item_sep: ','
+        exclude_keys: []
+  runtime:
+    version: 1.1.0
+    cwd: /data1/chenyifeng/MultiVector-Backup/dpr-scale
+    config_sources:
+    - path: hydra.conf
+      schema: pkg
+      provider: hydra
+    - path: /data1/chenyifeng/MultiVector-Backup/dpr-scale/dpr_scale/conf
+      schema: file
+      provider: main
+    - path: ''
+      schema: structured
+      provider: schema
+    choices:
+      checkpoint_callback: default
+      trainer: slurm_aws
+      datamodule: generate
+      task/optim: adamw
+      task/transform: hf_transform
+      task/model: citadel_model
+      task: multivec
+      hydra/env: default
+      hydra/callbacks: null
+      hydra/job_logging: default
+      hydra/hydra_logging: default
+      hydra/hydra_help: default
+      hydra/help: default
+      hydra/sweeper: basic
+      hydra/launcher: submitit_slurm
+      hydra/output: default
+  verbose: false
+task:
+  _target_: dpr_scale.task.citadel_task.MultiVecRetrieverTask
+  shared_model: true
+  in_batch_eval: false
+  datamodule: null
+  warmup_steps: 3000
+  pretrained_checkpoint_path: null
+  model:
+    _target_: dpr_scale.models.citadel_models.citadel_model.CITADELEncoder
+    model_path: bert-base-uncased
+    cls_projection_dim: 128
+    tok_projection_dim: 32
+    dropout: 0.1
+  transform:
+    _target_: dpr_scale.transforms.hf_transform.HFTransform
+    model_path: ${task.model.model_path}
+    max_seq_len: 256
+  optim:
+    _target_: torch.optim.AdamW
+    lr: 2.0e-05
+    betas:
+    - 0.9
+    - 0.999
+    eps: 1.0e-08
+    weight_decay: 0
+    amsgrad: false
+  add_cls: true
+  query_topk: 1
+  context_topk: 5
+  weight_threshold: 0.0
+  ctx_embeddings_dir: /data1/chenyifeng/MultiVector-Backup/dpr-scale/embeddings
+  checkpoint_path: /data1/chenyifeng/MultiVector-Backup/dpr-scale/ckpt/checkpoint_best.ckpt
+  add_context_id: false
+datamodule:
+  _target_: dpr_scale.datamodule.dpr.DenseRetrieverPassagesDataModule
+  test_path: /data1/chenyifeng/MultiVector-Backup/dpr-scale/datasets/scidocs/dpr-scale/corpus.tsv
+  test_batch_size: 128
+  use_title: true
+  train_path: /fsx/mhli/msmarco_passage/msmarco_exp_train.jsonl
+  val_path: /fsx/mhli/msmarco_passage/msmarco_exp_dev.jsonl
+  batch_size: 16
+  num_negative: 1
+  num_val_negative: 1
+  num_test_negative: 50
+  drop_last: false
+trainer:
+  gpus: 8
+  num_nodes: 1
+  max_epochs: 20
+  max_steps: null
+  num_sanity_val_steps: 0
+  log_every_n_steps: 10
+  gradient_clip_val: 2.0
+  accumulate_grad_batches: 1
+  strategy: ddp
+  precision: 16
+test_only: false
+checkpoint_callback:
+  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  monitor: valid_mrr
+  mode: max
+  save_last: true
+  verbose: true
+  filename: checkpoint_best
+  save_top_k: 3

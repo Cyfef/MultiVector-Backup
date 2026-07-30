@@ -47,6 +47,8 @@ do
         +task.topk=100 +task.cuda=True \
         +task.quantizer=pq \
         +task.sub_vec_dim=4 \
+        task.model.model_path="${LOCAL_MODEL_PATH}" \
+        task.transform.model_path="${LOCAL_MODEL_PATH}" \
         trainer.precision=16 +task.expert_parallel=True \
         trainer=gpu_1_host trainer.gpus=1
     done

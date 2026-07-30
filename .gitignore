@@ -210,5 +210,25 @@ Thumbs.db
 # 日志文件
 *.log
 
-# 数据集
-MultiVector-Backup/multivector_baselines/data/
+# 数据，模型
+/dpr-scale/datasets/
+/dpr-scale/embeddings/
+/dpr-scale/merged_embeddings/
+/dpr-scale/model/hug/
+/dpr-scale/multirun/
+/dpr-scale/outputs/
+/dpr-scale/retrieval/
+
+
+/EMVB/work/
+
+/WARP/indexes/
+/WARP/my_runs/
+
+/svr-baselines/backup/
+/svr-baselines/data_clerc/
+/svr-baselines/runs/clerc-large-single/
+
+
+# 模型文件
+/dpr-scale/ckpt/checkpoint_best.ckpt

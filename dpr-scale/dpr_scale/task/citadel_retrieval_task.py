@@ -49,7 +49,7 @@ class CITADELRetrievalTask(MultiVecRetrieverTask):
         print(f"Loading checkpoint from {self.checkpoint_path}")
         checkpoint = pl_load(
             self.checkpoint_path, map_location=lambda storage, loc: storage)
-        self.load_state_dict(checkpoint['state_dict'])
+        self.load_state_dict(checkpoint['state_dict'],strict=False)
         print(f"Loading passages from {self.passages}")
         self.ctxs = IDCSVDataset(self.passages, use_id=True)
         print("Setting up index...")

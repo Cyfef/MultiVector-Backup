@@ -12,7 +12,9 @@ DATASET="$2"
 MANIFEST="${3:-/data1/${USERNAME}/Dataset/multi-vector-retrieval/FlatData/${DATASET}/manifest.json}"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 
-cd /home/ali/plaid-index
+export CUDA_VISIBLE_DEVICES=2
+export CXX=/usr/bin/g++-9
+export CC=/usr/bin/gcc-9
 
 "${PYTHON_BIN}" script/flat_multivector/build_plaid_from_flat_dataset.py \
   --username "${USERNAME}" \

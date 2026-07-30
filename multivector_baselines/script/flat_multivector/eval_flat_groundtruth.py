@@ -207,7 +207,7 @@ def main() -> None:
     groundtruth_path = Path(manifest["prepared"]["groundtruth_jsonl"])
     answer_dir = runtime_root / "Result" / "answer"
     performance_dir = runtime_root / "Result" / "performance"
-    output_csv = args.output_csv or (runtime_root / "Result" / "performance" / f"{args.dataset}-flat-eval-summary.csv")
+    output_csv = args.output_csv or (runtime_root / "Result" / "performance" / f"{args.method}-{args.dataset}-flat-eval-summary.csv")
 
     groundtruth = read_groundtruth(groundtruth_path)
     answer_files = choose_answer_files(answer_dir=answer_dir, dataset=args.dataset, method=args.method)

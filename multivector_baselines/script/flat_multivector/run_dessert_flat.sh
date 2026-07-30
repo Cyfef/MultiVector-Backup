@@ -13,7 +13,6 @@ MANIFEST="${3:-/data1/${USERNAME}/Dataset/multi-vector-retrieval/FlatData/${DATA
 INDEX_ROOT="/data1/${USERNAME}/Dataset/multi-vector-retrieval/Index/${DATASET}/plaid"
 PYTHON_BIN="${PYTHON_BIN:-python}"
 
-cd /home/ali/plaid-index
 
 if [[ ! -f "${INDEX_ROOT}/centroids.pt" ]]; then
   echo "Plaid artifacts not found for ${DATASET}. Bootstrapping Plaid build first."

@@ -6,7 +6,16 @@ import torch
 import torch.nn as nn
 from dpr_scale.utils.utils import ScriptEncoder, PathManager
 from pytorch_lightning import LightningModule
-from pytorch_lightning.strategies import DDPShardedStrategy, DDPStrategy
+# from pytorch_lightning.strategies import DDPShardedStrategy, DDPStrategy
+
+# 兼容 PyTorch Lightning 1.x 和 2.x
+try:
+    from pytorch_lightning.strategies import DDPStrategy, DDPShardedStrategy
+except (ImportError, ModuleNotFoundError):
+    from pytorch_lightning.strategies import DDPStrategy
+    # 2.x 中移除了 DDPShardedStrategy，由于推理时不会用到，设为 None
+    DDPShardedStrategy = None
+
 from torch.distributed.algorithms.ddp_comm_hooks.default_hooks import (
     fp16_compress_hook,
 )
@@ -87,7 +96,7 @@ class DenseRetrieverTask(LightningModule):
         """
         self.setup("fit")
 
-    def on_pretrain_routine_start(self):
+    def on_fit_start(self):
         if self.fp16_grads:
             self.trainer.strategy._model.register_comm_hook(None, fp16_compress_hook)
 

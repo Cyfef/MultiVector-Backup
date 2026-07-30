@@ -1,6 +1,9 @@
 # (c) Facebook, Inc. and its affiliates. Confidential and proprietary.
 
 import hydra
+import time
+import yaml   
+import os
 import glob
 import json
 import os
@@ -30,7 +33,39 @@ def main(cfg: MainConfig):
     datamodule = hydra.utils.instantiate(cfg.datamodule, transform=transform)
 
     trainer = Trainer(**cfg.trainer)
+
+    test_loader = datamodule.test_dataloader()
+    total_queries = len(test_loader.dataset) if hasattr(test_loader.dataset, '__len__') else None
+
+    # === 开始计时 ===
+    start_time = time.perf_counter()
+
     trainer.test(task, datamodule=datamodule)
+
+    end_time = time.perf_counter()
+
+    elapsed = end_time - start_time
+    qps = total_queries / elapsed if total_queries and elapsed > 0 else None
+
+    meta = {
+        "context_topk": getattr(cfg.task, "context_topk", None),
+        "query_topk": getattr(cfg.task, "query_topk", None),
+        "quantizer": getattr(cfg.task, "quantizer", None),
+        "sub_vec_dim": getattr(cfg.task, "sub_vec_dim", None),
+        "portion": getattr(cfg.task, "portion", None),
+        "cuda": getattr(cfg.task, "cuda", None),
+        "batch_size": cfg.datamodule.test_batch_size,
+        "pruning_weight": os.environ.get("pruning_weight", "unknown"),  # 从环境变量读取
+        "total_queries": total_queries,
+        "elapsed_sec": elapsed,
+        "qps": qps,
+    }
+
+    perf_dir = os.path.join(cfg.task.output_path, "performance")
+    os.makedirs(perf_dir, exist_ok=True)
+    perf_file = os.path.join(perf_dir, "performance.yaml")
+    with open(perf_file, "w") as f:
+        yaml.dump(meta, f, default_flow_style=False)
     
     if cfg.datamodule.trec_format:
         input_paths = sorted(glob.glob(os.path.join(cfg.task.output_path, "retrieval_*.trec")))

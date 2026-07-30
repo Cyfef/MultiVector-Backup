@@ -2,7 +2,22 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved
 
 import torch
-from pytorch_lightning.strategies import DDPShardedStrategy, DDPStrategy
+#from pytorch_lightning.strategies import DDPShardedStrategy, DDPStrategy
+
+# 兼容 PyTorch Lightning 1.x 和 2.x
+try:
+    from pytorch_lightning.strategies import DDPStrategy, DDPShardedStrategy
+except (ImportError, ModuleNotFoundError):
+    from pytorch_lightning.strategies import DDPStrategy
+    # PL 2.x 将 sharded 策略移到了 fabric 或更改了名称
+    # 如果代码中实际使用了该类但我们现在用不到，设为一个占位符
+    try:
+        from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
+        # 可以用 FSDP 替代，但为了兼容类型，定义一个别名
+        DDPShardedStrategy = None  # 或自定义类
+    except ImportError:
+        DDPShardedStrategy = None  # 如果未定义，设为 None
+
 from dpr_scale.task.dpr_task import DenseRetrieverTask
 
 class MultiVecRetrieverTask(DenseRetrieverTask):

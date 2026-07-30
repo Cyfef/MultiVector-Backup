@@ -72,7 +72,7 @@ class DPRDistillTask(LightningModule):
         """
         self.setup("fit")
 
-    def on_pretrain_routine_start(self) -> None:
+    def on_fit_start(self) -> None:
         if self.fp16_grads:
             self.trainer.strategy._model.register_comm_hook(None, fp16_compress_hook)
 

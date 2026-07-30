@@ -9,6 +9,7 @@ conda activate CITADEL
 conda install -c conda-forge faiss-gpu
 pip install torch --index-url https://download.pytorch.org/whl/cu121
 pip install torch-scatter -f https://data.pyg.org/whl/torch-2.4.0+cu121.html
+pip install beir
 pip install -r requirements.txt
 ```
 
@@ -34,10 +35,39 @@ wget https://dl.fbaipublicfiles.com/citadel/checkpoints/citadel/citadel_plus/che
 
 ```bash
 DATASET=(arguana climate-fever dbpedia-entity fever fiqa hotpotqa nfcorpus nq quora scifact scidocs trec-covid webis-touche2020)
+DATASET=(scidocs)
 for dataset in ${DATASET[*]}
 do
     echo $dataset
     python dpr_scale/citadel_scripts/convert_beir_to_dpr_format.py $dataset <output path>
+done
+```
+
+The dataset downloaded is aranged as 
+
+```
+<output path>
+└── datasets/                      
+    └── $dataset/                
+        ├── corpus.jsonl           # origin file
+        ├── queries.jsonl          # origin file
+        ├── qrels/                 # origin file
+        │   └── test.tsv           # origin file
+        └── dpr-scale/             # converged dataset
+            ├── corpus.tsv         
+            ├── index2docid.tsv    
+            ├── queries.tsv        
+            └── test.tsv           
+```
+
+**For scidocs:**
+
+```bash
+DATASET=(scidocs)
+for dataset in ${DATASET[*]}
+do
+    echo $dataset
+    python dpr_scale/citadel_scripts/convert_beir_to_dpr_format.py $dataset /data1/chenyifeng/MultiVector-Backup/dpr-scale
 done
 ```
 
@@ -98,6 +128,34 @@ do
     done
 ```
 
+
+**For Scidocs:**
+
+```bash
+CHECKPOINT_PATH=/data1/chenyifeng/MultiVector-Backup/dpr-scale/ckpt/checkpoint_best.ckpt
+
+DATASET=(scidocs)
+for dataset in ${DATASET[*]} 
+do
+    echo $dataset
+    CTX_EMBEDDINGS_DIR=/data1/chenyifeng/MultiVector-Backup/dpr-scale/embeddings
+    DATA_PATH=/data1/chenyifeng/MultiVector-Backup/dpr-scale/datasets/${dataset}/dpr-scale/corpus.tsv
+
+    HYDRA_FULL_ERROR=1 PYTHONPATH=.:$PYTHONPATH nohup python dpr_scale/citadel_scripts/generate_multivec_embeddings.py -m --config-name msmarco_aws.yaml \
+    datamodule=generate \
+    datamodule.test_path=$DATA_PATH \
+    task=multivec task/model=citadel_model \
+    task.model.tok_projection_dim=32 task.model.cls_projection_dim=128 \
+    task.shared_model=True \
+    +task.add_cls=True \
+    +task.query_topk=1 +task.context_topk=5 \
+    +task.weight_threshold=0.0 \
+    +task.ctx_embeddings_dir=$CTX_EMBEDDINGS_DIR \
+    +task.checkpoint_path=$CHECKPOINT_PATH \
+    +task.add_context_id=False > nohup_${dataset}.log 2>&1&
+done
+```
+
 3. Merge embeddings
 
 ```bash
@@ -111,6 +169,20 @@ do
 done
 ```
 You could further compress the index size using product quantization and pruning. We skip the compression step for simplicity.
+
+
+**For Scidocs:**
+
+```bash
+DATASET=(scidocs)
+for dataset in ${DATASET[*]} 
+do
+    echo $dataset
+    OUTPUT_DIR=/data1/chenyifeng/MultiVector-Backup/dpr-scale/merged_embeddings
+    CTX_EMBEDDINGS_DIR=/data1/chenyifeng/MultiVector-Backup/dpr-scale/embeddings
+    PYTHONPATH=.:$PYTHONPATH python dpr_scale/citadel_scripts/merge_experts.py $OUTPUT_DIR "$CTX_EMBEDDINGS_DIR" "0-31000"
+done
+```
 
 
 4. Retrieval

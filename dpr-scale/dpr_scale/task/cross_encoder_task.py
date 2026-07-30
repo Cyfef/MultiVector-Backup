@@ -68,7 +68,7 @@ class CrossEncoderTask(LightningModule):
         """
         self.setup("fit")
 
-    def on_pretrain_routine_start(self):
+    def on_fit_start(self):
         if self.fp16_grads:
             self.trainer.strategy._model.register_comm_hook(None, fp16_compress_hook)
     

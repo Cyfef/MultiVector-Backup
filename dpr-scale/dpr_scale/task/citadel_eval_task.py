@@ -6,7 +6,16 @@ import pathlib
 import pickle
 import torch
 from dpr_scale.utils.utils import PathManager
-from pytorch_lightning.utilities.cloud_io import load as pl_load
+#from pytorch_lightning.utilities.cloud_io import load as pl_load
+
+# 兼容新旧版本 PyTorch Lightning 的导入
+try:
+    from pytorch_lightning.utilities.cloud_io import load as pl_load
+except (ModuleNotFoundError, ImportError):
+    # PL 2.0+ 移除了 cloud_io，改用 torch.load 替代
+    import torch
+    def pl_load(path, map_location=None):
+        return torch.load(path, map_location=map_location)
 
 import collections
 from tqdm import tqdm
@@ -27,7 +36,7 @@ class GenerateMultiVecEmbeddingsTask(MultiVecRetrieverTask):
         print(f"Loading checkpoint from {self.checkpoint_path}")
         checkpoint = pl_load(
             self.checkpoint_path, map_location=lambda storage, loc: storage)
-        self.load_state_dict(checkpoint['state_dict'])
+        self.load_state_dict(checkpoint['state_dict'],strict=False)
 
     def forward(self, contexts_ids):
         # encode contexts

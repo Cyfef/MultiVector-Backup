@@ -229,6 +229,8 @@ Thumbs.db
 /svr-baselines/backup/
 /svr-baselines/data_clerc/
 /svr-baselines/runs/clerc-large-single/
+/svr-baselines/runs/scidocs-single/
+/svr-baselines/runs/fiqa-single/
 
 
 # 模型文件

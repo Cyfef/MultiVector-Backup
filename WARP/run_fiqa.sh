@@ -12,6 +12,7 @@ THRESHOLD=0.5
 NDOCS=256
 
 export CXX=/usr/bin/g++-9
+export CUDA_VISIBLE_DEVICES=3
 
 # 构建索引
 python utility/index_from_embeddings.py \

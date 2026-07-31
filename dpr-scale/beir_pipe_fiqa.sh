@@ -1,4 +1,4 @@
-DATASET=(scidocs)
+DATASET=(fiqa)
 pruning_weights=(0.7 1.3 1.5 1.7 1.9)
 threshold=10000
 BASE_DIR=/data1/chenyifeng/MultiVector-Backup/dpr-scale

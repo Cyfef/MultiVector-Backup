@@ -233,5 +233,8 @@ Thumbs.db
 /svr-baselines/runs/fiqa-single/
 
 
+/SSR/data/
+/SSR/output/
+
 # 模型文件
 /dpr-scale/ckpt/checkpoint_best.ckpt

@@ -3,6 +3,9 @@
 
 from __future__ import annotations
 
+# import os
+# os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 from ssr import _bootstrap  # noqa: F401  — cuda/venv bootstrap before torch
 
 import argparse

@@ -31,6 +31,10 @@ python prepare_msmarco.py \
   --processed-dir ./data/processed/msmarco
 ```
 
+```
+export CUDA_VISIBLE_DEVICES=1
+```
+
 1. SSR-tok
 
 ```bash
@@ -40,6 +44,18 @@ python -m ssr.train \
   --sae-token-scope non-cls \
   --sample-format triplet \
   --output-dir ./output/ssr-token
+```
+
+better use:
+
+```bash
+torchrun --nproc_per_node=4 -m ssr.train \
+  --dataset msmarco-passage \
+  --data-dir ./data/processed/msmarco/passage \
+  --sae-token-scope non-cls \
+  --sample-format triplet \
+  --output-dir ./output/ssr-token \
+  --batch-size 64
 ```
 
 2. SSR-CLS
@@ -53,6 +69,17 @@ python -m ssr.train \
   --output-dir ./output/ssr-cls
 ```
 
+better use:
+
+```bash
+torchrun --nproc_per_node=4 -m ssr.train \
+  --dataset msmarco-passage \
+  --data-dir ./data/processed/msmarco/passage \
+  --sae-token-scope cls \
+  --sample-format triplet \
+  --output-dir ./output/ssr-cls \
+  --batch-size 64
+```
 
 ### Retrieval
 
@@ -126,10 +153,10 @@ python -m ssr.retrieval.eval_mteb \
   --index-cache-dir ./data/cache/mteb_index_e2e/scidocs \
   --score-device index \
   --index-accum-device cpu \
-  --top-k 100 \                     
-  --mrr-k 10 100 \                      
-  --ndcg-k 10 100 \                    
-  --recall-k 10 100 \         
+  --top-k 100 \
+  --mrr-k 10 100 \
+  --ndcg-k 10 100 \
+  --recall-k 10 100 \
   --map-k 10 100 
 ```
 
@@ -140,17 +167,17 @@ python -m ssr.retrieval.eval_mteb \
 python -m ssr.retrieval.eval_mteb \
   --task retrieval \
   --corpus-backend e2e-index \
-  --variant ssr-cls++ \
+  --variant ssr++ \
   --model-path ./output/ssr-token/final \
   --cls-sae-path ./output/ssr-cls/final \
   --dataset scidocs \
   --data-dir ./data/processed/mteb \
   --index-cache-dir ./data/cache/mteb_index_e2e/scidocs_cls \
   --score-device index \
-  --index-accum-device cpu
-  --top-k 100 \                     
-  --mrr-k 10 100 \                      
-  --ndcg-k 10 100 \                    
-  --recall-k 10 100 \         
-  --map-k 10 100 
+  --index-accum-device cpu \
+  --top-k 100 \
+  --mrr-k 10 100 \
+  --ndcg-k 10 100 \
+  --recall-k 10 100 \
+  --map-k 10 100
 ```

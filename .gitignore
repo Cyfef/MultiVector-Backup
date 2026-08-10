@@ -235,6 +235,7 @@ Thumbs.db
 
 /SSR/data/
 /SSR/output/
+/SSR/wandb/
 
 # 模型文件
 /dpr-scale/ckpt/checkpoint_best.ckpt

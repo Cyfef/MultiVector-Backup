@@ -18,7 +18,7 @@ LOGS_DIR="${RUN_DIR}/logs"
 # 数据集文件前缀
 PREFIX="${DATASET}_sv"
 
-max_calc_lists=(100 500 1000 2000 3000 4000 5000)
+max_calc_lists=(10 50 100 200 400 500 1000 2000 3000 4000 5000)
 
 # ==================== 准备数据 ====================
 mkdir -p "${INPUTS_DIR}" "${HCNNG_DIR}" "${HNSWLIB_DIR}" "${LOGS_DIR}"

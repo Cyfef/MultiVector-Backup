@@ -21,7 +21,7 @@ PREFIX="${DATASET}_sv"
 # 索引文件
 INDEX_FILE="${HNSWLIB_DIR}/index.bin"
 
-ef_search_lists=(100 150 200 300 500 800 1000 1200 2000 3000 4000 5000)
+ef_search_lists=(5 10 20 30 50 100 150 200 300 500 800 1000 1200 2000 3000 4000 5000 6000 7000 8000)
 
 for ef_search in ${ef_search_lists[*]}
 do

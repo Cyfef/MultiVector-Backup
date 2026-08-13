@@ -161,7 +161,7 @@ if __name__ == '__main__':
                 },
                 100: {
                     'n_table': [64],
-                    'initial_filter_k': [100, 200, 500, 1000, 2000, 5000, 8000, 10000],
+                    'initial_filter_k': [100, 150, 200, 300, 400, 500, 1000, 2000, 5000, 8000, 10000],
                     'nprobe_query': [2, 4],
                     'remove_centroid_dupes': [True],
                     'n_thread': [1],

@@ -1,4 +1,4 @@
-name: warp
+name: WARP
 channels:
   - pytorch
   - conda-forge

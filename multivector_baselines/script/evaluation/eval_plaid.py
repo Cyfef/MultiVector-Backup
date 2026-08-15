@@ -89,7 +89,7 @@ if __name__ == '__main__':
             'username': args.username,
             # 'dataset_l': ['lotte-500-gnd'],
             'dataset_l': [args.dataset],
-            'topk_l': [10, 100],
+            'topk_l': [100],
             'retrieval_parameter_l': [
                 # {'ndocs': 32, 'ncells': 64, 'centroid_score_threshold': 0.5, "n_thread": 1},
                 # {'ndocs': 128, 'ncells': 64, 'centroid_score_threshold': 0.5, "n_thread": 1},
@@ -124,16 +124,16 @@ if __name__ == '__main__':
 
 
                 # --- final exp test ---
-                10: {
-                    'ndocs': [10,50,100,200,500,1000,2000,5000,8000,10000],
-                    'ncells': [64],
-                    'centroid_score_threshold': [0.5],
-                    'n_thread': [1]
-                },
+                # 10: {
+                #     'ndocs': [10,50,100,200,500,1000,2000,5000,8000,10000],
+                #     'ncells': [64],
+                #     'centroid_score_threshold': [0.5],
+                #     'n_thread': [1]
+                # },
                 100: {
-                    'ndocs': [10,50,100,200,500,1000,2000,5000,8000,10000],
-                    'ncells': [64],
-                    'centroid_score_threshold': [0.5],
+                    'ndocs': [10,20,30,40,50,60,70,80,90,100,150,200,256,500,1024,2000,4096,8000,10000],
+                    'ncells': [2,4,8,10,16,24,32,48,64,80,128],
+                    'centroid_score_threshold': [0.35,0.4,0.45,0.5,0.55],
                     'n_thread': [1]
                 },
                 

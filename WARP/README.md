@@ -6,6 +6,11 @@
 conda env create -f conda_env_cpu.yml
 conda activate warp
 
+conda create -n WARP python=3.8 -y
+conda activate WARP
+
+pip install -r requirements.txt
+
 conda install "mkl<2025" packaging -y
 conda install -c conda-forge gcc_linux-64 gxx_linux-64
 conda install -c nvidia cuda-nvcc cuda-cudart-dev

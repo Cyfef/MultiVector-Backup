@@ -116,7 +116,7 @@ if __name__ == '__main__':
         },
         'local': {
             'username': args.username,
-            'topk_l': [10, 100],
+            'topk_l': [100],
             'retrieval_parameter_l': [],
             'grid_search': True,
             'grid_search_para': {
@@ -152,17 +152,17 @@ if __name__ == '__main__':
                 # },
                 
                 # --- final test ---
-                10: {
-                    'n_table': [64],
-                    'initial_filter_k': [10, 50, 100, 500, 1000],
-                    'nprobe_query': [2],
-                    'remove_centroid_dupes': [True],
-                    'n_thread': [1],
-                },
+                # 10: {
+                #     'n_table': [64],
+                #     'initial_filter_k': [10, 50, 100, 500, 1000],
+                #     'nprobe_query': [2],
+                #     'remove_centroid_dupes': [True],
+                #     'n_thread': [1],
+                # },
                 100: {
-                    'n_table': [64],
-                    'initial_filter_k': [100, 150, 200, 300, 400, 500, 1000, 2000, 5000, 8000, 10000],
-                    'nprobe_query': [2, 4],
+                    'n_table': [4, 8,16,32,64, 128, 512, 2048, 8192],
+                    'initial_filter_k': [100, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536], 
+                    'nprobe_query': [1, 2, 4, 8, 16, 32],             
                     'remove_centroid_dupes': [True],
                     'n_thread': [1],
                 },

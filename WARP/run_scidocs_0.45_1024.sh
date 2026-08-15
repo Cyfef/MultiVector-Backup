@@ -11,7 +11,10 @@ INDEX_NAME=beir-${DATASET}.split=test.precomputed=colbert.nbits=2
 THRESHOLD=0.45
 NDOCS=1024
 
-export CXX=/usr/bin/g++-9
+export CC=$CONDA_PREFIX/bin/x86_64-conda-linux-gnu-gcc
+export CXX=$CONDA_PREFIX/bin/x86_64-conda-linux-gnu-g++
+export CUDAHOSTCXX=$CXX
+
 export CUDA_VISIBLE_DEVICES=3
 
 # 构建索引

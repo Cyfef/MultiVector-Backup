@@ -160,9 +160,9 @@ if __name__ == '__main__':
                 #     'n_thread': [1],
                 # },
                 100: {
-                    'n_table': [4, 8,16,32,64, 128, 512, 2048, 8192],
-                    'initial_filter_k': [100, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536], 
-                    'nprobe_query': [1, 2, 4, 8, 16, 32],             
+                    'n_table': [16,64,128],
+                    'initial_filter_k': [500], 
+                    'nprobe_query': [4],             
                     'remove_centroid_dupes': [True],
                     'n_thread': [1],
                 },

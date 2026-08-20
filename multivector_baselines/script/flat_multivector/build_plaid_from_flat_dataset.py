@@ -27,6 +27,16 @@ def main() -> None:
     parser.add_argument("--username", type=str, default="ali")
     parser.add_argument("--dataset", type=str, required=True)
     parser.add_argument("--manifest", type=Path, default=None)
+
+    # new !!!
+    parser.add_argument("--num_partitions_override", type=int, default=None)
+    parser.add_argument("--num_partitions_multiplier", type=int, default=None)
+    parser.add_argument("--kmeans_sample_multiplier", type=int, default=16)
+    parser.add_argument("--typical_doclen", type=int, default=120)
+
+    parser.add_argument("--index_subdir", type=str, default="", help="Subdirectory under Index/{dataset} to store this index")
+    # new !!!
+
     args = parser.parse_args()
 
     runtime_root = Path(f"/data1/{args.username}/Dataset/multi-vector-retrieval")
@@ -47,6 +57,16 @@ def main() -> None:
     colbert_run.build_index_official(
         username=args.username,
         dataset=args.dataset,
+
+        # new !!!
+        num_partitions_override=args.num_partitions_override,          # 直接指定中心数
+        num_partitions_multiplier=args.num_partitions_multiplier,           
+        kmeans_sample_multiplier = args.kmeans_sample_multiplier,
+        typical_doclen= args.typical_doclen,
+        
+        subdir=args.index_subdir,
+        # new !!!
+
         embedding_folder=transformed_embeddings,
         input_query_embedding_file=query_embeddings,
         gt_file=groundtruth_jsonl,

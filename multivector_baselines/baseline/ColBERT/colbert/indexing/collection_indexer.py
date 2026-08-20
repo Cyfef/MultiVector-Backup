@@ -114,8 +114,24 @@ class CollectionIndexer():
         # Select the number of partitions
         num_passages = len(self.collection)
         self.num_embeddings_est = num_passages * avg_doclen_est
+
+
+        # ---- 核心修改部分 ----
+        # 1. 如果 num_partitions_override 不为 None，直接使用
+        if self.config.num_partitions_override is not None:
+            self.num_partitions = self.config.num_partitions_override
+        # 2. 否则如果 num_partitions_multiplier 不为 None，用该乘数替换公式中的 16
+        elif self.config.num_partitions_multiplier is not None:
+            multiplier = self.config.num_partitions_multiplier
+            self.num_partitions = int(2 ** np.floor(np.log2(multiplier * np.sqrt(self.num_embeddings_est))))
+        # 3. 否则使用默认乘数 16
+        else:
+            self.num_partitions = int(2 ** np.floor(np.log2(16 * np.sqrt(self.num_embeddings_est))))
+        # ---- 结束 ----
+
+        # self.num_partitions = int(2 ** np.floor(np.log2(16 * np.sqrt(self.num_embeddings_est))))
+
         # self.num_partitions = int(2 ** np.floor(np.log2(4 * np.sqrt(self.num_embedings_est)))) # 16
-        self.num_partitions = int(2 ** np.floor(np.log2(16 * np.sqrt(self.num_embeddings_est))))
         # self.num_partitions = 100
 
         Run().print_main(f'Creaing {self.num_partitions:,} partitions.')
@@ -133,8 +149,16 @@ class CollectionIndexer():
         # So the formula is max(100% * min(total, 100k), 15% * min(total, 1M), ...)
         # Then we subsample the vectors to 100 * num_partitions
 
-        typical_doclen = 120  # let's keep sampling independent of the actual doc_maxlen 120 1
-        sampled_pids = 16 * np.sqrt(typical_doclen * num_passages) # 16 2
+        # 从 config 读取自定义乘数
+        multiplier = getattr(self.config, 'kmeans_sample_multiplier', 16)
+
+        typical_doclen = getattr(self.config, 'typical_doclen', 120)
+        # typical_doclen = 120  # let's keep sampling independent of the actual doc_maxlen 120 1
+
+        sampled_pids = multiplier * np.sqrt(typical_doclen * num_passages)
+        # sampled_pids = 16 * np.sqrt(typical_doclen * num_passages) # 16 2
+
+
         # sampled_pids = np.sqrt(typical_doclen * num_passages) / 2
         # sampled_pids = int(2 ** np.floor(np.log2(1 + sampled_pids)))
         sampled_pids = min(1 + int(sampled_pids), num_passages)

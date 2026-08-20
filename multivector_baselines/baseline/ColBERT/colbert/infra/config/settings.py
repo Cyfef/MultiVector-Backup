@@ -164,6 +164,13 @@ class IndexingSettings:
 
     resume: bool = DefaultVal(False)
 
+    # 新增
+    num_partitions_override: int = DefaultVal(None)      # 若不为None，直接使用该值
+    num_partitions_multiplier: float = DefaultVal(None)  # 若不为None，替换公式中的16
+
+    kmeans_sample_multiplier: int = DefaultVal(16)
+    typical_doclen: int = DefaultVal(120)
+
     @property
     def index_path_(self):
         return self.index_path or os.path.join(self.index_root_, self.index_name)

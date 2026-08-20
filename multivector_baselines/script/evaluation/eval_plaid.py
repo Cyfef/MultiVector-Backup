@@ -11,15 +11,26 @@ ROOT_PATH = os.path.join(FILE_ABS_PATH, os.pardir, os.pardir)
 sys.path.append(ROOT_PATH)
 ROOT_PATH = os.path.join(FILE_ABS_PATH, os.pardir, os.pardir, 'baseline', 'ColBERT')
 sys.path.append(ROOT_PATH)
+
 from script.evaluation import performance_metric
 from baseline.ColBERT import run as colbert_run
 # from script import util
 import argparse
 
-def retrieval(username: str, dataset: str, retrieval_parameter_l: list, topk: int):
+def retrieval(username: str, 
+              dataset: str, 
+              retrieval_parameter_l: list, 
+              topk: int,
+              # new !!!
+              index_subdir: str = ""):
     logging.info(f"plaid retrieval start {dataset}")
-    colbert_run.retrieval_official(username=username, dataset=dataset,
-                                   topk=topk, search_config_l=retrieval_parameter_l)
+    colbert_run.retrieval_official(username=username, 
+                                   dataset=dataset,
+                                   topk=topk, 
+                                   search_config_l=retrieval_parameter_l,
+                                   # new!!!
+                                   subdir=index_subdir   
+                                    )
     logging.info(f"plaid retrieval end {dataset}")
 
 
@@ -43,6 +54,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='argparse')
     parser.add_argument('--username', type=str, default="ali")
     parser.add_argument('--dataset', type=str, default="msmarco-large") # clip-multi-clustering clerc_128  scidocs-large msmarco-large
+    
+    parser.add_argument("--index_subdir", type=str, default="",help="Subdirectory under Index/{dataset}/plaid/")
+
     args = parser.parse_args()
     config_l = {
         'dbg': {
@@ -131,9 +145,9 @@ if __name__ == '__main__':
                 #     'n_thread': [1]
                 # },
                 100: {
-                    'ndocs': [10,20,30,40,50,60,70,80,90,100,150,200,256,500,1024,2000,4096,8000,10000],
-                    'ncells': [2,4,8,10,16,24,32,48,64,80,128],
-                    'centroid_score_threshold': [0.35,0.4,0.45,0.5,0.55],
+                    'ndocs': [500],
+                    'ncells': [64],
+                    'centroid_score_threshold': [0.5],
                     'n_thread': [1]
                 },
                 
@@ -208,4 +222,9 @@ if __name__ == '__main__':
             else:
                 retrieval_parameter_l = config['retrieval_parameter_l']
 
-            retrieval(username=username, dataset=dataset, retrieval_parameter_l=retrieval_parameter_l, topk=topk)
+            retrieval(username=username, 
+                      dataset=dataset, 
+                      retrieval_parameter_l=retrieval_parameter_l, 
+                      topk=topk,
+                      # new !!!
+                      index_subdir=args.index_subdir)

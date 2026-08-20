@@ -10,6 +10,9 @@ import json
 import sys
 import pandas as pd
 
+import resource  
+
+
 FILE_ABS_PATH = os.path.dirname(__file__)
 ROOT_PATH = os.path.join(FILE_ABS_PATH, os.pardir, os.pardir, os.pardir)
 sys.path.append(ROOT_PATH)
@@ -121,15 +124,38 @@ def build_index(
                              doc_offsets[doc_id][0]: doc_offsets[doc_id][1]
                              ],
         )
-    build_index_time_except_centroid = time.time() - build_index_start_time
-
-    build_index_info_m = {'build_index_time_except_centroid(s)': build_index_time_except_centroid,
-                          'hashes_per_table': hashes_per_table}
+    
     index.serialize_to_file(index_filename)
+
+    # ========== 新增：记录指标 ==========
+    # 1. 索引文件大小（字节）
+    index_size_bytes = os.path.getsize(index_filename)
+
+    # 2. 峰值内存（单位 KB，兼容 Linux/Mac）
+
+    # resource.RUSAGE_SELF 表示当前进程
+    mem_usage = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    # Linux 下 ru_maxrss 单位为 KB，Mac 为 bytes，此处统一转为 MB 以便阅读
+    # 也可以保留原始单位，在 JSON 中注明
+    peak_mem_kb = mem_usage  # 若为 Mac，实际是 bytes，需除以 1024
+    # 跨平台检测：若值很大（> 2^31），认为是 bytes 而非 KB
+    if peak_mem_kb > 2**31:
+        peak_mem_kb = peak_mem_kb // 1024
+    # =================================
+
+    build_index_time_except_centroid = time.time() - build_index_start_time
+    
+    build_index_info_m = {'build_index_time_except_centroid(s)': build_index_time_except_centroid,
+                          'hashes_per_table': hashes_per_table,
+                          'index_size_bytes': index_size_bytes,                
+                          'peak_build_mem_kb': peak_mem_kb                    
+                          }
+
 
     build_index_filename = os.path.join(result_performance_path,
                                         f"{dataset}-build_index-dessert-n_table_{num_tables}-time.json")
 
+    os.makedirs(os.path.dirname(build_index_filename), exist_ok=True)
     with open(build_index_filename, "w") as f:
         json.dump(build_index_info_m, f)
 
@@ -279,6 +305,7 @@ def retrieval(
         result_filename = os.path.join(result_answer_path,
                                        f"{dataset}-dessert-top{topk}-{build_index_suffix}-{retrieval_suffix}.tsv")
 
+        os.makedirs(os.path.dirname(result_filename), exist_ok=True)
         with open(result_filename, "w") as f:
             for qid_index, r in enumerate(all_pids):
                 qid = qid_map[qid_index]
@@ -322,6 +349,7 @@ def retrieval(
         method_performance_name = f'{dataset}-retrieval-{module_name}-top{topk}-{build_index_suffix}-{retrieval_suffix}.json'
         result_performance_path = f'/data1/{username}/Dataset/multi-vector-retrieval/Result/performance'
         performance_filename = os.path.join(result_performance_path, method_performance_name)
+        os.makedirs(os.path.dirname(performance_filename), exist_ok=True)
         with open(performance_filename, "w") as f:
             json.dump(retrieval_info_m, f)
 

@@ -3,6 +3,7 @@ import json
 import os
 import csv
 
+import resource
 
 # os.environ["CUDA_VISIBLE_DEVICES"] = ""
 # export CUDA_VISIBLE_DEVICES=""
@@ -27,6 +28,26 @@ ROOT_PATH = os.path.join(FILE_ABS_PATH, os.pardir, os.pardir)
 sys.path.append(ROOT_PATH)
 from script.evaluation import performance_metric
 
+
+def get_peak_memory_kb():
+    """返回当前进程的峰值内存占用（KB），若不可用则返回 None"""
+    try:
+        return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    except AttributeError:
+        return None
+
+def get_directory_size(path):
+    """递归计算目录总大小（字节）"""
+    total = 0
+    for dirpath, dirnames, filenames in os.walk(path):
+        for f in filenames:
+            fp = os.path.join(dirpath, f)
+            try:
+                total += os.path.getsize(fp)
+            except OSError:
+                # 处理权限或文件被删除等情况
+                pass
+    return total
 
 def resolve_checkpoint_path(raw_data_path: str = None):
     candidates = []
@@ -119,7 +140,24 @@ def get_n_chunk(base_dir: str):
     return len(match_chunkID_l)
 
 
-def build_index_official(username: str, dataset: str, embedding_folder: str = None, input_query_embedding_file: str = None, gt_file:str=None, doc_count_file:str=None, datasets_with_embeddings:list = ["openai", "mscoco","clerc","clip-multi-clustering"], dataset_dim_mappings={"openai":768, "mscoco":768, "clerc":768, "clip-multi-clustering":768}, query_embedding_len_file= None):
+def build_index_official(username: str, 
+                         dataset: str,
+
+                         num_partitions_override:int,          # 直接指定中心数
+                         num_partitions_multiplier:int,           # 将 16 替换为 24
+                         kmeans_sample_multiplier:int,
+                         typical_doclen:int,
+
+                         subdir: str = "",
+
+                         embedding_folder: str = None, 
+                         input_query_embedding_file: str = None, 
+                         gt_file:str=None, 
+                         doc_count_file:str=None, 
+                         datasets_with_embeddings:list = ["openai", "mscoco","clerc","clip-multi-clustering"], 
+                         dataset_dim_mappings={"openai":768, "mscoco":768, "clerc":768, "clip-multi-clustering":768}, 
+                         query_embedding_len_file= None):
+    
     colbert_project_path = f'/data1/{username}/multi-vector-retrieval/baseline/ColBERT'
     raw_data_path = f'/data1/{username}/Dataset/multi-vector-retrieval/RawData'
     pretrain_index_path = resolve_checkpoint_path(raw_data_path)
@@ -158,12 +196,13 @@ def build_index_official(username: str, dataset: str, embedding_folder: str = No
         np.save(os.path.join(embedding_path, "query_n_vec_length.npy"), query_embedding_len)
         
         # os.makedirs(, exist_ok=True)
+
     base_embedding_path = os.path.join(embedding_path, 'base_embedding')
     query_embedding_filename = os.path.join(embedding_path, 'query_embedding.npy')
+
     index_path = f'/data1/{username}/Dataset/multi-vector-retrieval/Index/{dataset}'
+    index_path = os.path.join(index_path, 'plaid',subdir)
     result_performance_path = f'/data1/{username}/Dataset/multi-vector-retrieval/Result/performance'
-    
-    os.makedirs(result_performance_path, exist_ok=True)
 
     # n_gpu = torch.cuda.device_count()
     # # torch.set_num_threads(12)
@@ -182,7 +221,14 @@ def build_index_official(username: str, dataset: str, embedding_folder: str = No
         config = ColBERTConfig(
             nbits=2,
             root=colbert_project_path,
-            dim = dim
+            dim = dim,
+
+            # new !!!
+            num_partitions_override=num_partitions_override,          # 直接指定中心数
+            num_partitions_multiplier=num_partitions_multiplier,           # 将 16 替换为 24
+            kmeans_sample_multiplier = kmeans_sample_multiplier,
+            typical_doclen= typical_doclen
+            # new !!!
         )
         print(config)
         indexer = Indexer(checkpoint=pretrain_index_path, config=config)
@@ -192,23 +238,45 @@ def build_index_official(username: str, dataset: str, embedding_folder: str = No
                                                                                       'transformed_embeddings'),
                                                               embedding_filename=base_embedding_path,
                                                               overwrite=True)
+        
     index_origin_path = os.path.join(colbert_project_path, f'experiments/{dataset}/indexes/{dataset}')
     delete_file_if_exist(index_path)
     os.makedirs(index_path, exist_ok=False)
-    index_new_path = os.path.join(index_path, 'plaid')
-    os.system(f'mv {index_origin_path} {index_new_path}')
-    
+    # os.makedirs(index_path, exist_ok=True)
+    index_new_path = index_path
+    os.system(f'mv {index_origin_path}/* {index_new_path}/')
+    # os.system(f'mv {index_origin_path} {index_new_path}')    
+
     n_chunk = get_n_chunk(base_embedding_path)
     total_doclens = []
     for chunkID in range(n_chunk):
         doclens = np.load(os.path.join(base_embedding_path, f'doclens{chunkID}.npy'))
         total_doclens = np.append(total_doclens, doclens)
     np.save(os.path.join(embedding_path, 'doclens.npy'), total_doclens)
-    
+
     print("finish indexing, start searching")
 
-    build_index_json = {'build_index_time (s)': build_index_time, 'encode_passage_time (s)': encode_passage_time}
-    with open(os.path.join(result_performance_path, f'{dataset}-build_index-plaid-.json'), 'w') as f:
+    build_index_json = {'build_index_time (s)': build_index_time, 
+                        'encode_passage_time (s)': encode_passage_time}
+
+    # ---- 新增：收集性能指标 ----
+    # 峰值内存（整个进程构建期间）
+    peak_mem_kb = get_peak_memory_kb()
+    
+    # 索引大小（移动后的最终索引目录）
+    index_size_bytes = get_directory_size(index_new_path)
+    
+    # 更新 JSON 内容
+    build_index_json.update({
+        'index_size (B)': index_size_bytes,
+        'peak_build_mem (KB)': peak_mem_kb if peak_mem_kb is not None else -1
+    })
+
+    performance_save_dir = os.path.join(result_performance_path, dataset,'plaid',subdir)
+    os.makedirs(performance_save_dir, exist_ok=True)
+
+    # with open(os.path.join(result_performance_path, f'{dataset}-build_index-plaid-.json'), 'w') as f:
+    with open(os.path.join(performance_save_dir,'build_index.json'), 'w') as f:
         json.dump(build_index_json, f)
 
     with Run().context(
@@ -250,8 +318,12 @@ def build_index_official(username: str, dataset: str, embedding_folder: str = No
 
     encode_info = {'total_encode_time_ms': total_encode_time_ms, 'n_encode_query': n_encode_query,
                    'average_encode_time_ms': total_encode_time_ms / n_encode_query}
-    with open(os.path.join(result_performance_path, f'{dataset}-encode_query.json'), 'w') as f:
+
+
+    # with open(os.path.join(result_performance_path, f'{dataset}-encode_query.json'), 'w') as f:
+    with open(os.path.join(performance_save_dir, 'encode_query.json'), 'w') as f:
         json.dump(encode_info, f)
+
 
     if query_embedding_len_file is not None:
         print("save query embedding length")
@@ -385,16 +457,29 @@ def load_dev_query(username: str, dataset: str, n_sample_query: int):
     return train_query
 
 
-def  retrieval_official(username: str, dataset: str, topk: int, search_config_l: list):
+def  retrieval_official(username: str, 
+                        dataset: str, 
+                        topk: int, 
+                        search_config_l: list,
+                        subdir: str = ""):
     colbert_project_path = f'/data1/{username}/multi-vector-retrieval/baseline/ColBERT'
+
     raw_data_path = f'/data1/{username}/Dataset/multi-vector-retrieval/RawData'
     pretrain_index_path = resolve_checkpoint_path(raw_data_path)
     document_data_path = os.path.join(raw_data_path, f'{dataset}/document')
     embedding_path = f'/data1/{username}/Dataset/multi-vector-retrieval/Embedding/{dataset}'
     query_embedding_filename = os.path.join(embedding_path, 'query_embedding.npy')
+
     index_path = f'/data1/{username}/Dataset/multi-vector-retrieval/Index/{dataset}'
+
     result_performance_path = f'/data1/{username}/Dataset/multi-vector-retrieval/Result/performance'
     result_answer_path = f'/data1/{username}/Dataset/multi-vector-retrieval/Result/answer'
+
+    answer_dir = os.path.join(result_answer_path, dataset, 'plaid', subdir) 
+    perf_dir = os.path.join(result_performance_path, dataset, 'plaid', subdir) 
+    os.makedirs(answer_dir, exist_ok=True)
+    os.makedirs(perf_dir, exist_ok=True)
+
     query_text_filename = os.path.join(document_data_path, 'queries.dev.tsv')
 
     n_gpu = torch.cuda.device_count()
@@ -405,7 +490,7 @@ def  retrieval_official(username: str, dataset: str, topk: int, search_config_l:
     # mrr_gnd, success_gnd, recall_gnd_id_m = performance_metric.load_groundtruth(username=username, dataset=dataset,
                                                                                 # topk=topk)
 
-    index_new_path = os.path.join(index_path, 'plaid')
+    index_new_path = os.path.join(index_path, 'plaid', subdir)
     module_name = 'plaid' 
 
     query_emb = np.load(query_embedding_filename)
@@ -452,9 +537,12 @@ def  retrieval_official(username: str, dataset: str, topk: int, search_config_l:
         para_score_thres = "{:.2f}".format(searcher.config.centroid_score_threshold)
         retrieval_suffix = f'ndocs_{searcher.config.ndocs}-ncells_{searcher.config.ncells}-' \
                            f'centroid_score_threshold_{para_score_thres}-n_thread_{search_config["n_thread"]}'
+        # ranking.save_absolute_path(
+            # os.path.join(result_answer_path,
+              #           f'{dataset}-plaid-top{topk}-{build_index_suffix}-{retrieval_suffix}.tsv'))
         ranking.save_absolute_path(
-            os.path.join(result_answer_path,
-                         f'{dataset}-plaid-top{topk}-{build_index_suffix}-{retrieval_suffix}.tsv'))
+            os.path.join(answer_dir, f'{dataset}-plaid-top{topk}-{build_index_suffix}-{retrieval_suffix}.tsv')
+        )
 
         search_time_m = {
             'total_query_time_ms': '{:.3f}'.format(sum(retrieval_time_l)),
@@ -488,7 +576,8 @@ def  retrieval_official(username: str, dataset: str, topk: int, search_config_l:
 
         method_performance_name = f'{dataset}-retrieval-{module_name}-top{topk}-{build_index_suffix}-{retrieval_suffix}.json'
         result_performance_path = f'/data1/{username}/Dataset/multi-vector-retrieval/Result/performance'
-        performance_filename = os.path.join(result_performance_path, method_performance_name)
+        # performance_filename = os.path.join(result_performance_path, method_performance_name)
+        performance_filename = os.path.join(perf_dir, method_performance_name)
         with open(performance_filename, "w") as f:
             json.dump(retrieval_info_m, f)
 

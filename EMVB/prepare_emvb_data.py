@@ -17,6 +17,19 @@ import numpy as np
 from faiss.contrib.inspect_tools import get_invlist
 from tqdm.auto import tqdm
 
+import resource
+import os
+
+def get_dir_size(path: Path) -> int:
+    """Return total size (in bytes) of all regular files under `path`."""
+    total = 0
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            fp = os.path.join(root, f)
+            if os.path.isfile(fp):
+                total += os.path.getsize(fp)
+    return total
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -443,6 +456,13 @@ def main() -> None:
     emb2pid = build_emb2pid(doclens)
     decompose_faiss_index(cpu_index, emb2pid, output_dir)
 
+    # ---------- 新增：计算索引大小 ----------
+    index_size_bytes = get_dir_size(output_dir)
+
+    # ---------- 新增：获取峰值内存（使用 resource） ----------
+    # ru_maxrss 单位为 KiB（Linux/macOS），转换为字节
+    peak_mem_bytes = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024
+
     metadata = {
         "base_embeddings": str(Path(args.base_embeddings).resolve()),
         "doclens": str(Path(args.doclens).resolve()) if args.doclens else None,
@@ -471,6 +491,10 @@ def main() -> None:
         "gpu_use_float16": args.gpu_use_float16,
         "gpu_train_only": args.gpu_train_only,
         "elapsed_seconds": time.time() - start,
+        # ---------- 新增字段 ----------
+        "index_size_bytes": index_size_bytes,
+        "peak_build_mem_bytes": peak_mem_bytes,
+        # -------------------------------
     }
     (output_dir / "metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
     print(json.dumps(metadata, indent=2))
